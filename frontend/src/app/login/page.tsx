@@ -129,6 +129,7 @@ function LoginContent() {
           <button
             type="submit"
             disabled={loading}
+            suppressHydrationWarning
             className="w-full bg-indigo-600 hover:bg-indigo-500 disabled:opacity-50 text-white font-bold py-3.5 px-4 rounded-xl flex items-center justify-center gap-2 text-sm transition-all mt-6 shadow-lg shadow-indigo-600/20"
           >
             {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : <>Sign In <ArrowRight className="w-4 h-4" /></>}
@@ -145,6 +146,7 @@ function LoginContent() {
         <button
           onClick={() => handleGoogleLogin()}
           disabled={googleLoading}
+          suppressHydrationWarning
           className="w-full bg-slate-950 hover:bg-slate-900 border border-slate-800 hover:border-slate-700 disabled:opacity-50 text-slate-200 font-semibold py-3 px-4 rounded-xl flex items-center justify-center gap-2.5 text-sm transition-all"
         >
           {googleLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Chrome className="w-4 h-4 text-indigo-400" />}
