@@ -1,0 +1,59 @@
+version: '3.8'
+
+services:
+  database:
+    image: mongo:6.0-jammy
+    container_name: resumeiq_db
+    restart: always
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongodb_data:/data/db
+    networks:
+      - resumeiq_network
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: ../docker/backend.Dockerfile
+    container_name: resumeiq_backend
+    restart: always
+    ports:
+      - "5000:5000"
+    environment:
+      - PORT=5000
+      - NODE_ENV=development
+      - MONGODB_URI=mongodb://database:27017/resumeiq
+      - JWT_ACCESS_SECRET=your_jwt_access_secret_key_minimum_32_characters_long
+      - JWT_REFRESH_SECRET=your_jwt_refresh_secret_key_minimum_32_characters_long
+      - GEMINI_API_KEY=${GEMINI_API_KEY}
+      - CLIENT_URL=http://localhost:3000
+      - SMTP_HOST=smtp.mailtrap.io
+      - SMTP_PORT=2525
+    depends_on:
+      - database
+    networks:
+      - resumeiq_network
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: ../docker/frontend.Dockerfile
+    container_name: resumeiq_frontend
+    restart: always
+    ports:
+      - "3000:3000"
+    environment:
+      - NEXT_PUBLIC_API_URL=http://localhost:5000/api
+      - PORT=3000
+    depends_on:
+      - backend
+    networks:
+      - resumeiq_network
+
+volumes:
+  mongodb_data:
+
+networks:
+  resumeiq_network:
+    driver: bridge
