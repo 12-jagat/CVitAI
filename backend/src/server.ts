@@ -15,9 +15,13 @@ const app = express();
 app.use(helmet());
 
 // Enable CORS with dynamic configurations
+const allowedOrigin = env.CLIENT_URL.endsWith('/') 
+  ? env.CLIENT_URL.slice(0, -1) 
+  : env.CLIENT_URL;
+
 app.use(
   cors({
-    origin: env.CLIENT_URL,
+    origin: allowedOrigin,
     credentials: true,
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
     allowedHeaders: ['Content-Type', 'Authorization'],
