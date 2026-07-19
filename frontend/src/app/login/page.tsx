@@ -75,7 +75,7 @@ function LoginContent() {
             <div className="bg-indigo-600 p-1.5 rounded-lg text-white">
               <Sparkles className="w-4 h-4" />
             </div>
-            <span className="font-display text-lg font-bold text-white">ResumeIQ AI</span>
+            <span className="font-display text-lg font-bold text-white">CVItAI</span>
           </Link>
           <h1 className="text-2xl font-bold text-white tracking-tight">Welcome Back</h1>
           <p className="text-slate-400 text-xs mt-1.5">Sign in to manage and edit your resumes</p>
@@ -152,7 +152,7 @@ function LoginContent() {
         </button>
 
         <div className="mt-8 text-center text-xs text-slate-400">
-          New to ResumeIQ?{' '}
+          New to CVItAI?{' '}
           <Link href="/register" className="text-indigo-400 hover:text-indigo-350 font-bold transition-colors">
             Create Account
           </Link>

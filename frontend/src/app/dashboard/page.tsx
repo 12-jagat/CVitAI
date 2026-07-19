@@ -152,7 +152,7 @@ export default function DashboardPage() {
               <Sparkles className="w-5 h-5" />
             </div>
             <span className="font-display text-xl font-bold tracking-tight text-white">
-              ResumeIQ <span className="text-indigo-400">AI</span>
+              CVItAI
             </span>
           </Link>
 

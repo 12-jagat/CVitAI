@@ -113,8 +113,8 @@ export default function LandingPage() {
 
   const faqs = [
     {
-      q: "What is ResumeIQ AI?",
-      a: "ResumeIQ AI is an advanced career platform that combines a live, template-driven resume editor with Google Gemini AI to analyze your text, score it against modern ATS databases, and help you tailor your resume directly to job descriptions."
+      q: "What is CVItAI?",
+      a: "CVItAI is an advanced career platform that combines a live, template-driven resume editor with Google Gemini AI to analyze your text, score it against modern ATS databases, and help you tailor your resume directly to job descriptions."
     },
     {
       q: "How does the AI Resume Reviewer work?",
@@ -126,7 +126,7 @@ export default function LandingPage() {
     },
     {
       q: "How does Job Description Matching work?",
-      a: "By pasting a job description next to your resume, ResumeIQ compares the keywords, required tech stacks, and educational criteria, computing a match percentage and pointing out exactly which terms are missing."
+      a: "By pasting a job description next to your resume, CVItAI compares the keywords, required tech stacks, and educational criteria, computing a match percentage and pointing out exactly which terms are missing."
     },
     {
       q: "Is there a limit on PDF/Word exports?",
@@ -149,7 +149,7 @@ export default function LandingPage() {
               <Sparkles className="w-5 h-5" />
             </div>
             <span className="font-display text-xl font-bold tracking-tight text-white">
-              ResumeIQ <span className="text-indigo-400">AI</span>
+              CVItAI
             </span>
           </Link>
 
@@ -332,7 +332,7 @@ export default function LandingPage() {
                 <span className="w-3 h-3 bg-amber-500 rounded-full" />
                 <span className="w-3 h-3 bg-emerald-500 rounded-full" />
               </div>
-              <div className="text-xs text-slate-500 font-mono select-none">resumeiq-builder-preview.tsx</div>
+              <div className="text-xs text-slate-500 font-mono select-none">cvitai-builder-preview.tsx</div>
               <div className="w-10" />
             </div>
             
@@ -419,7 +419,7 @@ export default function LandingPage() {
       <section className="py-20 md:py-32 px-6 max-w-7xl mx-auto border-t border-slate-900">
         <div className="text-center mb-16">
           <h2 className="text-3xl md:text-5xl font-display font-extrabold tracking-tight text-white mb-4">
-            Job Seekers Excel with ResumeIQ
+            Job Seekers Excel with CVItAI
           </h2>
           <p className="text-slate-400 max-w-xl mx-auto">
             See how professionals are upgrading their scorecards and securing roles.
@@ -584,7 +584,7 @@ export default function LandingPage() {
             <div className="bg-indigo-600 p-1.5 rounded-lg text-white">
               <Sparkles className="w-4 h-4" />
             </div>
-            <span className="font-display font-bold text-base text-white">ResumeIQ AI</span>
+            <span className="font-display font-bold text-base text-white">CVItAI</span>
           </div>
 
           <div className="flex flex-wrap items-center justify-center gap-8 text-xs text-slate-400 font-medium">
@@ -592,7 +592,7 @@ export default function LandingPage() {
             <a href="#pricing" className="hover:text-white transition-colors">Pricing</a>
             <a href="#faq" className="hover:text-white transition-colors">FAQ</a>
             <span className="text-slate-800">|</span>
-            <span className="text-slate-500">© 2026 ResumeIQ AI. All rights reserved.</span>
+            <span className="text-slate-500">© 2026 CVItAI. All rights reserved.</span>
           </div>
         </div>
       </footer>

@@ -50,7 +50,7 @@ app.use('/api', apiLimiter);
 app.get('/', (req: Request, res: Response) => {
   res.status(200).json({
     success: true,
-    message: 'Welcome to the ResumeIQ AI API',
+    message: 'Welcome to the CVItAI API',
     version: '1.0.0',
   });
 });
@@ -81,5 +81,5 @@ const startServer = async () => {
 };
 
 startServer().catch((err) => {
-  console.error('Failed to start ResumeIQ backend server:', err);
+  console.error('Failed to start CVItAI backend server:', err);
 });

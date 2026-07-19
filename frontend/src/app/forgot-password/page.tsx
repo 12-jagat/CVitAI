@@ -45,7 +45,7 @@ export default function ForgotPasswordPage() {
             <div className="bg-indigo-600 p-1.5 rounded-lg text-white">
               <Sparkles className="w-4 h-4" />
             </div>
-            <span className="font-display text-lg font-bold text-white">ResumeIQ AI</span>
+            <span className="font-display text-lg font-bold text-white">CVItAI</span>
           </Link>
           <h1 className="text-2xl font-bold text-white tracking-tight">Forgot Password</h1>
           <p className="text-slate-400 text-xs mt-1.5 leading-relaxed">

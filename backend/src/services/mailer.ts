@@ -24,10 +24,10 @@ const transporter = createTransporter();
 
 export const sendVerificationEmail = async (email: string, name: string, token: string): Promise<void> => {
   const verifyUrl = `${env.CLIENT_URL}/verify-email?token=${token}&email=${email}`;
-  const subject = 'Verify Your Email Address - ResumeIQ AI';
+  const subject = 'Verify Your Email Address - CVItAI';
   const html = `
     <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #e0e0e0; border-radius: 8px;">
-      <h2 style="color: #2563eb; text-align: center;">Welcome to ResumeIQ AI!</h2>
+      <h2 style="color: #2563eb; text-align: center;">Welcome to CVItAI!</h2>
       <p>Hi ${name},</p>
       <p>Thank you for signing up. Please click the button below to verify your email address and unlock all premium AI features:</p>
       <div style="text-align: center; margin: 30px 0;">
@@ -49,7 +49,7 @@ export const sendVerificationEmail = async (email: string, name: string, token: 
 
   try {
     await transporter.sendMail({
-      from: `"ResumeIQ AI" <${env.EMAIL_FROM}>`,
+      from: `"CVItAI" <${env.EMAIL_FROM}>`,
       to: email,
       subject,
       html,
@@ -61,7 +61,7 @@ export const sendVerificationEmail = async (email: string, name: string, token: 
 
 export const sendResetPasswordEmail = async (email: string, name: string, token: string): Promise<void> => {
   const resetUrl = `${env.CLIENT_URL}/reset-password?token=${token}&email=${email}`;
-  const subject = 'Reset Your Password - ResumeIQ AI';
+  const subject = 'Reset Your Password - CVItAI';
   const html = `
     <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #e0e0e0; border-radius: 8px;">
       <h2 style="color: #2563eb; text-align: center;">Password Reset Request</h2>
@@ -86,7 +86,7 @@ export const sendResetPasswordEmail = async (email: string, name: string, token:
 
   try {
     await transporter.sendMail({
-      from: `"ResumeIQ AI" <${env.EMAIL_FROM}>`,
+      from: `"CVItAI" <${env.EMAIL_FROM}>`,
       to: email,
       subject,
       html,
@@ -96,7 +96,7 @@ export const sendResetPasswordEmail = async (email: string, name: string, token:
   }
 };
 export const sendVerificationCode = async (email: string, name: string, code: string): Promise<void> => {
-  const subject = 'Your Verification Code - ResumeIQ AI';
+  const subject = 'Your Verification Code - CVItAI';
   const html = `
     <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #e0e0e0; border-radius: 8px;">
       <h2 style="color: #2563eb; text-align: center;">Your Verification Code</h2>
@@ -119,7 +119,7 @@ export const sendVerificationCode = async (email: string, name: string, code: st
 
   try {
     await transporter.sendMail({
-      from: `"ResumeIQ AI" <${env.EMAIL_FROM}>`,
+      from: `"CVItAI" <${env.EMAIL_FROM}>`,
       to: email,
       subject,
       html,

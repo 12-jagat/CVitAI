@@ -16,9 +16,9 @@ const outfit = Outfit({
 });
 
 export const metadata: Metadata = {
-  title: 'ResumeIQ AI - Premium AI Resume Builder & ATS Reviewer',
+  title: 'CVItAI - Premium AI Resume Builder & ATS Reviewer',
   description: 'Design ATS-friendly, professional resumes, get instant recruiter reviews, optimize bullet points with Google Gemini, and match job descriptions seamlessly.',
-  keywords: 'Resume builder, CV maker, ATS review, AI resume analyzer, career optimization, Gemini resume editor',
+  keywords: 'Resume builder, CV maker, ATS review, AI resume analyzer, career optimization, Gemini resume editor, CVItAI',
 };
 
 export default function RootLayout({
