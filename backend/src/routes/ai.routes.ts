@@ -1,5 +1,6 @@
 import { Router } from 'express';
 import { z } from 'zod';
+import multer from 'multer';
 import { protect } from '../middleware/auth';
 import { validate } from '../middleware/validation';
 import {
@@ -8,7 +9,26 @@ import {
   generateResumeEndpoint,
   suggestBulletsEndpoint,
   getReviewsForResume,
+  reviewGuestResumeEndpoint,
 } from '../controllers/ai.controller';
+
+const storage = multer.memoryStorage();
+const upload = multer({
+  storage,
+  limits: { fileSize: 5 * 1024 * 1024 }, // 5MB limit
+  fileFilter: (req, file, cb) => {
+    const allowedMimeTypes = [
+      'application/pdf',
+      'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+      'application/msword'
+    ];
+    if (allowedMimeTypes.includes(file.mimetype)) {
+      cb(null, true);
+    } else {
+      cb(new Error('Only PDF and Word DOCX documents are allowed') as any);
+    }
+  },
+});
 
 const router = Router();
 
@@ -38,6 +58,9 @@ const improveBulletsSchema = z.object({
     jobTitle: z.string().optional(),
   }),
 });
+
+// Public guest check endpoint
+router.post('/review-guest', upload.single('file'), reviewGuestResumeEndpoint);
 
 // Protect all AI routes
 router.use(protect);

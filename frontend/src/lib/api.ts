@@ -161,4 +161,6 @@ export const aiApi = {
     apiRequest('/ai/improve-bullets', { method: 'POST', body: JSON.stringify({ bullets, jobTitle }) }),
   getReviews: (resumeId: string): Promise<{ success: boolean; reviews: Review[] }> =>
     apiRequest(`/ai/reviews/${resumeId}`),
+  reviewGuest: (formData: FormData): Promise<{ success: boolean; review: Review }> =>
+    apiRequest('/ai/review-guest', { method: 'POST', body: formData }),
 };

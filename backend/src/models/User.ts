@@ -13,6 +13,8 @@ export interface IUser extends Document {
   resetPasswordExpires?: Date;
   googleId?: string;
   refreshTokens: string[];
+  reviewsUsed: number;
+  creationsUsed: number;
   createdAt: Date;
   updatedAt: Date;
   comparePassword(password: string): Promise<boolean>;
@@ -57,6 +59,14 @@ const UserSchema = new Schema<IUser>(
     refreshTokens: {
       type: [String],
       default: [],
+    },
+    reviewsUsed: {
+      type: Number,
+      default: 0,
+    },
+    creationsUsed: {
+      type: Number,
+      default: 0,
     },
   },
   {

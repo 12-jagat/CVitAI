@@ -19,9 +19,21 @@ const allowedOrigin = env.CLIENT_URL.endsWith('/')
   ? env.CLIENT_URL.slice(0, -1) 
   : env.CLIENT_URL;
 
+const allowedOrigins = [
+  'http://localhost:3000',
+  'http://localhost:3001',
+  allowedOrigin
+];
+
 app.use(
   cors({
-    origin: allowedOrigin,
+    origin: (origin, callback) => {
+      if (!origin || allowedOrigins.includes(origin)) {
+        callback(null, true);
+      } else {
+        callback(new Error('Not allowed by CORS'));
+      }
+    },
     credentials: true,
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
     allowedHeaders: ['Content-Type', 'Authorization'],

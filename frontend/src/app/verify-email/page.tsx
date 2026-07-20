@@ -59,9 +59,9 @@ function VerifyEmailForm() {
           <div className="bg-indigo-600 p-1.5 rounded-lg text-white">
             <Sparkles className="w-4 h-4" />
           </div>
-          <span className="font-display text-lg font-bold text-white">CVItAI</span>
+          <span className="font-display text-lg font-bold text-foreground">CVItAI</span>
         </Link>
-        <h1 className="text-2xl font-bold text-white tracking-tight">Verify Your Email</h1>
+        <h1 className="text-2xl font-bold text-foreground tracking-tight">Verify Your Email</h1>
         <p className="text-slate-400 text-xs mt-1.5 leading-relaxed">
           We sent a 6-digit verification code to <span className="text-indigo-400 font-bold">{email || 'your email'}</span>
         </p>

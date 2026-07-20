@@ -48,6 +48,15 @@ export const createResume = async (req: AuthRequest, res: Response, next: NextFu
     const userId = req.user?._id;
     const { title, templateId } = req.body;
 
+    // Check quota
+    if (req.user && req.user.creationsUsed >= 3) {
+      res.status(403).json({ 
+        success: false, 
+        message: 'You have exhausted your free resume creation limit. Please upgrade to Premium.' 
+      });
+      return;
+    }
+
     const resume = new Resume({
       userId,
       title: title || 'My Resume',
@@ -66,6 +75,12 @@ export const createResume = async (req: AuthRequest, res: Response, next: NextFu
     });
 
     await resume.save();
+
+    // Increment user quota
+    if (req.user) {
+      req.user.creationsUsed += 1;
+      await req.user.save();
+    }
 
     res.status(201).json({ success: true, resume });
   } catch (error) {
@@ -208,6 +223,15 @@ export const importResumeFile = async (req: AuthRequest, res: Response, next: Ne
       return;
     }
 
+    // Check quota
+    if (req.user && req.user.creationsUsed >= 3) {
+      res.status(403).json({ 
+        success: false, 
+        message: 'You have exhausted your free resume creation limit. Please upgrade to Premium.' 
+      });
+      return;
+    }
+
     // Process extracted text with Gemini
     const structuredResume = await GeminiService.parseResumeText(rawText);
 
@@ -220,6 +244,12 @@ export const importResumeFile = async (req: AuthRequest, res: Response, next: Ne
     });
 
     await resume.save();
+
+    // Increment user quota
+    if (req.user) {
+      req.user.creationsUsed += 1;
+      await req.user.save();
+    }
 
     res.status(201).json({
       success: true,

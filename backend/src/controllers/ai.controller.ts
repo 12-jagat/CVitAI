@@ -3,6 +3,8 @@ import { AuthRequest } from '../middleware/auth';
 import { Resume } from '../models/Resume';
 import { Review } from '../models/Review';
 import { GeminiService } from '../services/gemini.service';
+import pdfParse from 'pdf-parse';
+import mammoth from 'mammoth';
 
 /**
  * Review a resume to generate ATS score and improvement guidelines
@@ -14,6 +16,15 @@ export const reviewResumeEndpoint = async (req: AuthRequest, res: Response, next
 
     if (!resumeId) {
       res.status(400).json({ success: false, message: 'Resume ID is required' });
+      return;
+    }
+
+    // Check quota
+    if (req.user && req.user.reviewsUsed >= 1) {
+      res.status(403).json({ 
+        success: false, 
+        message: 'You have exhausted your free resume review limit. Please upgrade to Premium.' 
+      });
       return;
     }
 
@@ -34,6 +45,12 @@ export const reviewResumeEndpoint = async (req: AuthRequest, res: Response, next
     });
 
     await review.save();
+
+    // Increment user quota
+    if (req.user) {
+      req.user.reviewsUsed += 1;
+      await req.user.save();
+    }
 
     res.status(201).json({
       success: true,
@@ -136,6 +153,55 @@ export const getReviewsForResume = async (req: AuthRequest, res: Response, next:
     res.status(200).json({
       success: true,
       reviews,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+/**
+ * Public Guest Resume parser and review endpoint
+ */
+export const reviewGuestResumeEndpoint = async (req: any, res: Response, next: NextFunction): Promise<void> => {
+  try {
+    const file = req.file;
+
+    if (!file) {
+      res.status(400).json({ success: false, message: 'No file uploaded' });
+      return;
+    }
+
+    let rawText = '';
+
+    if (file.mimetype === 'application/pdf') {
+      const parsedPdf = await pdfParse(file.buffer);
+      rawText = parsedPdf.text;
+    } else if (
+      file.mimetype === 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' || 
+      file.mimetype === 'application/msword'
+    ) {
+      const parsedDocx = await mammoth.extractRawText({ buffer: file.buffer });
+      rawText = parsedDocx.value;
+    } else {
+      res.status(400).json({ success: false, message: 'Unsupported file type. Only PDF and DOCX files are allowed.' });
+      return;
+    }
+
+    if (!rawText.trim()) {
+      res.status(400).json({ success: false, message: 'Could not extract text content from the file' });
+      return;
+    }
+
+    // Process extracted text with Gemini
+    const structuredResume = await GeminiService.parseResumeText(rawText);
+
+    // Call Gemini API to review
+    const reviewData = await GeminiService.reviewResume(structuredResume);
+
+    res.status(200).json({
+      success: true,
+      message: 'Guest resume reviewed successfully',
+      review: reviewData,
     });
   } catch (error) {
     next(error);

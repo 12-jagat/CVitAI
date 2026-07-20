@@ -48,9 +48,9 @@ export default function RegisterPage() {
             <div className="bg-indigo-600 p-1.5 rounded-lg text-white">
               <Sparkles className="w-4 h-4" />
             </div>
-            <span className="font-display text-lg font-bold text-white">CVItAI</span>
+            <span className="font-display text-lg font-bold text-foreground">CVItAI</span>
           </Link>
-          <h1 className="text-2xl font-bold text-white tracking-tight">Create Account</h1>
+          <h1 className="text-2xl font-bold text-foreground tracking-tight">Create Account</h1>
           <p className="text-slate-400 text-xs mt-1.5 font-medium">Get started with professional AI builder resources</p>
         </div>
 

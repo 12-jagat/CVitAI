@@ -229,7 +229,7 @@ export class GeminiService {
           "original": string (an existing weak bullet point or project/job description line),
           "improved": string (the suggested stronger, result-oriented version using action verbs)
         }>,
-        "suggestions": Array<string> (actionable tips to improve the resume)
+        "suggestions": Array<string> (Generate exactly 5 to 6 clear, actionable tips to improve the resume. Each tip MUST begin with a specific highlighted action surrounded by double asterisks, for example: "**Optimize Summary**: Revise professional statement to add 3+ years experience.")
       }
     `;
 

@@ -4,6 +4,7 @@ import React, { useEffect, useState, useRef, useTransition } from 'react';
 import Link from 'next/link';
 import { useParams, useRouter } from 'next/navigation';
 import { useAuth } from '../../../components/AuthProvider';
+import ThemeToggle from '../../../components/ThemeToggle';
 import { resumeApi, aiApi } from '../../../lib/api';
 import { Resume, Experience, Education, Skill, Project, Certification, Language, Achievement, Review, JobMatchResults } from '../../../types';
 import { ResumeTemplateSelector } from '../../../components/ResumeTemplates';
@@ -43,7 +44,14 @@ import { Document as DocxDocument, Packer, Paragraph as DocxParagraph, TextRun a
 export default function BuilderPage() {
   const { id } = useParams() as { id: string };
   const router = useRouter();
-  const { user } = useAuth();
+  const { user, loading: authLoading } = useAuth();
+
+  // Redirect if not authenticated
+  useEffect(() => {
+    if (!authLoading && !user) {
+      router.push('/login');
+    }
+  }, [user, authLoading, router]);
 
   // Resume states
   const [resume, setResume] = useState<Resume | null>(null);
@@ -51,6 +59,9 @@ export default function BuilderPage() {
   const [saveStatus, setSaveStatus] = useState<'saved' | 'saving' | 'error'>('saved');
   const [activeSection, setActiveSection] = useState<string>('personalInfo');
   const [zoom, setZoom] = useState<number>(100);
+  const [fontStyle, setFontStyle] = useState('sans');
+  const [fontSize, setFontSize] = useState('md');
+  const [textColor, setTextColor] = useState('plum');
 
   // AI states
   const [aiActiveTab, setAiActiveTab] = useState<'none' | 'review' | 'match'>('none');
@@ -157,13 +168,13 @@ export default function BuilderPage() {
   // List field updater utilities
   const addListItem = (section: 'experience' | 'education' | 'skills' | 'projects' | 'certifications' | 'languages' | 'achievements', defaultItem: any) => {
     if (!resume) return;
-    const list = [...(resume[section] as any[]), defaultItem];
+    const list = [...(resume[section] || []), defaultItem];
     updateResumeField(section, list);
   };
 
   const updateListItem = (section: 'experience' | 'education' | 'skills' | 'projects' | 'certifications' | 'languages' | 'achievements', index: number, field: string, value: any) => {
     if (!resume) return;
-    const list = [...(resume[section] as any[])];
+    const list = [...(resume[section] || [])];
     list[index] = {
       ...list[index],
       [field]: value,
@@ -173,7 +184,7 @@ export default function BuilderPage() {
 
   const removeListItem = (section: 'experience' | 'education' | 'skills' | 'projects' | 'certifications' | 'languages' | 'achievements', index: number) => {
     if (!resume) return;
-    const list = [...(resume[section] as any[])].filter((_, i) => i !== index);
+    const list = [...(resume[section] || [])].filter((_, i) => i !== index);
     updateResumeField(section, list);
   };
 
@@ -351,7 +362,7 @@ export default function BuilderPage() {
         <div className="flex items-center gap-4">
           <Link 
             href="/dashboard" 
-            className="p-2 rounded-lg hover:bg-slate-900 text-slate-400 hover:text-white transition-all"
+            className="p-2 rounded-lg hover:bg-pink-100 text-slate-700 hover:text-pink-600 transition-all"
             title="Back to Dashboard"
           >
             <ArrowLeft className="w-4 h-4" />
@@ -361,13 +372,13 @@ export default function BuilderPage() {
               type="text" 
               value={resume.title}
               onChange={(e) => updateResumeField('title', e.target.value)}
-              className="bg-transparent border-b border-transparent focus:border-indigo-500 font-bold text-sm text-white px-0.5 outline-none tracking-tight"
+              className="bg-transparent border-b border-transparent focus:border-pink-500 font-bold text-sm text-slate-100 px-0.5 outline-none tracking-tight"
             />
             {/* Auto-save status logs */}
-            <span className="text-[10px] text-slate-500 mt-0.5 font-medium flex items-center gap-1.5 select-none">
-              {saveStatus === 'saved' && <><Check className="w-3.5 h-3.5 text-emerald-400" /> Changes saved</>}
-              {saveStatus === 'saving' && <><Loader2 className="w-3.5 h-3.5 text-indigo-400 animate-spin" /> Saving changes...</>}
-              {saveStatus === 'error' && <><AlertCircle className="w-3.5 h-3.5 text-rose-400" /> Save failed</>}
+            <span className="text-[10px] text-slate-600 mt-0.5 font-medium flex items-center gap-1.5 select-none">
+              {saveStatus === 'saved' && <><Check className="w-3.5 h-3.5 text-emerald-600" /> Changes saved</>}
+              {saveStatus === 'saving' && <><Loader2 className="w-3.5 h-3.5 text-pink-600 animate-spin" /> Saving changes...</>}
+              {saveStatus === 'error' && <><AlertCircle className="w-3.5 h-3.5 text-rose-600" /> Save failed</>}
             </span>
           </div>
         </div>
@@ -379,29 +390,90 @@ export default function BuilderPage() {
             onChange={(e) => updateResumeField('templateId', e.target.value)}
             className="bg-slate-900 border border-slate-800 focus:border-indigo-500 text-slate-200 text-xs font-semibold py-1.5 px-3 rounded-lg outline-none cursor-pointer"
           >
-            <option value="modern">Modern Layout</option>
-            <option value="minimal">Minimal Serif</option>
-            <option value="tech">Developer Mono</option>
-            <option value="elegant">Elegant classic</option>
+            <optgroup label="Modern Layouts">
+              <option value="modern-indigo">Modern Indigo</option>
+              <option value="modern-rose">Modern Rose</option>
+              <option value="modern-emerald">Modern Emerald</option>
+              <option value="modern-amber">Modern Amber</option>
+              <option value="modern-slate">Modern Slate</option>
+            </optgroup>
+            <optgroup label="Minimal Layouts">
+              <option value="minimal-indigo">Minimal Indigo</option>
+              <option value="minimal-rose">Minimal Rose</option>
+              <option value="minimal-emerald">Minimal Emerald</option>
+              <option value="minimal-amber">Minimal Amber</option>
+              <option value="minimal-slate">Minimal Slate</option>
+            </optgroup>
+            <optgroup label="Developer Layouts">
+              <option value="tech-indigo">Developer Indigo</option>
+              <option value="tech-rose">Developer Rose</option>
+              <option value="tech-emerald">Developer Emerald</option>
+              <option value="tech-amber">Developer Amber</option>
+              <option value="tech-slate">Developer Slate</option>
+            </optgroup>
+            <optgroup label="Classic Layouts">
+              <option value="elegant-indigo">Classic Indigo</option>
+              <option value="elegant-rose">Classic Rose</option>
+              <option value="elegant-emerald">Classic Emerald</option>
+              <option value="elegant-amber">Classic Amber</option>
+              <option value="elegant-slate">Classic Slate</option>
+            </optgroup>
+          </select>
+
+          {/* Font Selector */}
+          <select 
+            value={fontStyle}
+            onChange={(e) => setFontStyle(e.target.value)}
+            className="bg-slate-900 border border-slate-800 focus:border-indigo-500 text-slate-200 text-xs font-semibold py-1.5 px-3 rounded-lg outline-none cursor-pointer"
+            title="Font Style"
+          >
+            <option value="sans">Sans-Serif (Inter)</option>
+            <option value="serif">Serif (Lora)</option>
+            <option value="mono">Monospace (Code)</option>
+          </select>
+
+          {/* Size Selector */}
+          <select 
+            value={fontSize}
+            onChange={(e) => setFontSize(e.target.value)}
+            className="bg-slate-900 border border-slate-800 focus:border-indigo-500 text-slate-200 text-xs font-semibold py-1.5 px-3 rounded-lg outline-none cursor-pointer"
+            title="Font Size"
+          >
+            <option value="sm">Small Text</option>
+            <option value="md">Medium Text</option>
+            <option value="lg">Large Text</option>
+          </select>
+
+          {/* Text Color Selector */}
+          <select 
+            value={textColor}
+            onChange={(e) => setTextColor(e.target.value)}
+            className="bg-slate-900 border border-slate-800 focus:border-indigo-500 text-slate-200 text-xs font-semibold py-1.5 px-3 rounded-lg outline-none cursor-pointer"
+            title="Text Color"
+          >
+            <option value="plum">Deep Plum (Preferred)</option>
+            <option value="charcoal">Charcoal Black</option>
+            <option value="slate">Slate Gray</option>
+            <option value="navy">Corporate Navy</option>
           </select>
 
           <button 
             onClick={runAIsScan}
             className="bg-slate-900 border border-slate-800 hover:border-slate-700 text-slate-200 font-semibold py-1.5 px-3.5 rounded-lg text-xs flex items-center gap-1.5 transition-all"
           >
-            <Search className="w-3.5 h-3.5 text-indigo-400" /> ATS Scan
+            <Search className="w-3.5 h-3.5 text-pink-600" /> ATS Scan
           </button>
 
           <button 
             onClick={() => setAiActiveTab(aiActiveTab === 'match' ? 'none' : 'match')}
             className="bg-slate-900 border border-slate-800 hover:border-slate-700 text-slate-200 font-semibold py-1.5 px-3.5 rounded-lg text-xs flex items-center gap-1.5 transition-all"
           >
-            <BrainCircuit className="w-3.5 h-3.5 text-violet-400" /> Job Match
+            <BrainCircuit className="w-3.5 h-3.5 text-pink-600" /> Job Match
           </button>
 
           <button 
             onClick={printPdf}
-            className="bg-indigo-600 hover:bg-indigo-500 text-white font-bold py-1.5 px-4 rounded-lg text-xs flex items-center gap-1.5 shadow-lg shadow-indigo-600/25 transition-all"
+            className="bg-pink-600 hover:bg-pink-500 text-white font-bold py-1.5 px-4 rounded-lg text-xs flex items-center gap-1.5 shadow-lg shadow-pink-200/50 transition-all"
           >
             <Download className="w-3.5 h-3.5" /> PDF
           </button>
@@ -410,8 +482,10 @@ export default function BuilderPage() {
             onClick={exportWord}
             className="bg-slate-900 hover:bg-slate-800 border border-slate-800 text-slate-200 font-semibold py-1.5 px-3.5 rounded-lg text-xs flex items-center gap-1.5 transition-all"
           >
-            <FileText className="w-3.5 h-3.5 text-blue-400" /> DOCX
+            <FileText className="w-3.5 h-3.5 text-pink-600" /> DOCX
           </button>
+          
+          <ThemeToggle />
         </div>
       </nav>
 
@@ -779,6 +853,212 @@ export default function BuilderPage() {
                                 </button>
                               </div>
                             </div>
+                           )}
+
+                          {/* Projects list */}
+                          {sect.id === 'projects' && (
+                            <div className="space-y-6">
+                              {resume.projects && resume.projects.map((proj, projIdx) => (
+                                <div key={proj._id || projIdx} className="p-4 rounded-xl border border-slate-900 relative bg-slate-950/25 space-y-4">
+                                  <button 
+                                    onClick={() => removeListItem('projects', projIdx)}
+                                    className="absolute top-3 right-3 text-slate-500 hover:text-rose-400 p-1 rounded-lg hover:bg-slate-900 transition-all"
+                                  >
+                                    <Trash2 className="w-3.5 h-3.5" />
+                                  </button>
+
+                                  <div className="grid grid-cols-2 gap-4 text-left">
+                                    <div className="col-span-2 space-y-1">
+                                      <label className="text-[9px] font-bold text-slate-500 uppercase">Project Name</label>
+                                      <input 
+                                        type="text" 
+                                        value={proj.name}
+                                        onChange={(e) => updateListItem('projects', projIdx, 'name', e.target.value)}
+                                        className="w-full bg-slate-950 border border-slate-900 focus:border-indigo-500 rounded-lg py-1.5 px-3 text-xs text-slate-100 outline-none"
+                                      />
+                                    </div>
+                                    <div className="space-y-1">
+                                      <label className="text-[9px] font-bold text-slate-500 uppercase">Role / Position</label>
+                                      <input 
+                                        type="text" 
+                                        value={proj.role || ''}
+                                        onChange={(e) => updateListItem('projects', projIdx, 'role', e.target.value)}
+                                        className="w-full bg-slate-950 border border-slate-900 focus:border-indigo-500 rounded-lg py-1.5 px-3 text-xs text-slate-100 outline-none"
+                                      />
+                                    </div>
+                                    <div className="space-y-1">
+                                      <label className="text-[9px] font-bold text-slate-500 uppercase">Technologies (comma separated)</label>
+                                      <input 
+                                        type="text" 
+                                        value={proj.technologies ? proj.technologies.join(', ') : ''}
+                                        onChange={(e) => updateListItem('projects', projIdx, 'technologies', e.target.value.split(',').map(s => s.trim()))}
+                                        className="w-full bg-slate-950 border border-slate-900 focus:border-indigo-500 rounded-lg py-1.5 px-3 text-xs text-slate-100 outline-none"
+                                        placeholder="React, node, swift"
+                                      />
+                                    </div>
+                                    <div className="col-span-2 space-y-1">
+                                      <label className="text-[9px] font-bold text-slate-500 uppercase">Description</label>
+                                      <textarea 
+                                        value={proj.description}
+                                        rows={3}
+                                        onChange={(e) => updateListItem('projects', projIdx, 'description', e.target.value)}
+                                        className="w-full bg-slate-950 border border-slate-900 focus:border-indigo-500 rounded-lg p-2.5 text-xs text-slate-100 outline-none resize-none font-mono"
+                                      />
+                                    </div>
+                                  </div>
+                                </div>
+                              ))}
+                              
+                              <button
+                                onClick={() => addListItem('projects', { name: '', role: '', description: '', technologies: [] })}
+                                className="w-full py-2.5 bg-slate-900 border border-slate-850 hover:border-slate-800 text-slate-300 font-bold rounded-lg text-xs flex items-center justify-center gap-1.5 transition-all"
+                              >
+                                <Plus className="w-3.5 h-3.5" /> Add Project
+                              </button>
+                            </div>
+                          )}
+
+                          {/* Certifications list */}
+                          {sect.id === 'certifications' && (
+                            <div className="space-y-6">
+                              {resume.certifications && resume.certifications.map((cert, certIdx) => (
+                                <div key={cert._id || certIdx} className="p-4 rounded-xl border border-slate-900 relative bg-slate-950/25 space-y-4">
+                                  <button 
+                                    onClick={() => removeListItem('certifications', certIdx)}
+                                    className="absolute top-3 right-3 text-slate-500 hover:text-rose-400 p-1 rounded-lg hover:bg-slate-900 transition-all"
+                                  >
+                                    <Trash2 className="w-3.5 h-3.5" />
+                                  </button>
+
+                                  <div className="grid grid-cols-2 gap-4 text-left">
+                                    <div className="space-y-1">
+                                      <label className="text-[9px] font-bold text-slate-500 uppercase">Certificate Name</label>
+                                      <input 
+                                        type="text" 
+                                        value={cert.name}
+                                        onChange={(e) => updateListItem('certifications', certIdx, 'name', e.target.value)}
+                                        className="w-full bg-slate-950 border border-slate-900 focus:border-indigo-500 rounded-lg py-1.5 px-3 text-xs text-slate-100 outline-none"
+                                      />
+                                    </div>
+                                    <div className="space-y-1">
+                                      <label className="text-[9px] font-bold text-slate-500 uppercase">Issuing Organization</label>
+                                      <input 
+                                        type="text" 
+                                        value={cert.issuer}
+                                        onChange={(e) => updateListItem('certifications', certIdx, 'issuer', e.target.value)}
+                                        className="w-full bg-slate-950 border border-slate-900 focus:border-indigo-500 rounded-lg py-1.5 px-3 text-xs text-slate-100 outline-none"
+                                      />
+                                    </div>
+                                    <div className="space-y-1">
+                                      <label className="text-[9px] font-bold text-slate-500 uppercase">Issue Date</label>
+                                      <input 
+                                        type="text" 
+                                        value={cert.issueDate || ''}
+                                        onChange={(e) => updateListItem('certifications', certIdx, 'issueDate', e.target.value)}
+                                        className="w-full bg-slate-950 border border-slate-900 focus:border-indigo-500 rounded-lg py-1.5 px-3 text-xs text-slate-100 outline-none"
+                                        placeholder="MM/YYYY"
+                                      />
+                                    </div>
+                                  </div>
+                                </div>
+                              ))}
+                              
+                              <button
+                                onClick={() => addListItem('certifications', { name: '', issuer: '', issueDate: '' })}
+                                className="w-full py-2.5 bg-slate-900 border border-slate-850 hover:border-slate-800 text-slate-300 font-bold rounded-lg text-xs flex items-center justify-center gap-1.5 transition-all"
+                              >
+                                <Plus className="w-3.5 h-3.5" /> Add Credential / Certification
+                              </button>
+                            </div>
+                          )}
+
+                          {/* Languages list */}
+                          {sect.id === 'languages' && (
+                            <div className="space-y-6">
+                              {resume.languages && resume.languages.map((lang, langIdx) => (
+                                <div key={lang._id || langIdx} className="p-4 rounded-xl border border-slate-900 relative bg-slate-950/25 space-y-4">
+                                  <button 
+                                    onClick={() => removeListItem('languages', langIdx)}
+                                    className="absolute top-3 right-3 text-slate-500 hover:text-rose-455 p-1 rounded-lg hover:bg-slate-900 transition-all"
+                                  >
+                                    <Trash2 className="w-3.5 h-3.5" />
+                                  </button>
+
+                                  <div className="grid grid-cols-2 gap-4 text-left">
+                                    <div className="space-y-1">
+                                      <label className="text-[9px] font-bold text-slate-500 uppercase">Language</label>
+                                      <input 
+                                        type="text" 
+                                        value={lang.name}
+                                        onChange={(e) => updateListItem('languages', langIdx, 'name', e.target.value)}
+                                        className="w-full bg-slate-950 border border-slate-900 focus:border-indigo-500 rounded-lg py-1.5 px-3 text-xs text-slate-100 outline-none"
+                                      />
+                                    </div>
+                                    <div className="space-y-1">
+                                      <label className="text-[9px] font-bold text-slate-500 uppercase">Proficiency</label>
+                                      <input 
+                                        type="text" 
+                                        value={lang.proficiency}
+                                        onChange={(e) => updateListItem('languages', langIdx, 'proficiency', e.target.value)}
+                                        className="w-full bg-slate-950 border border-slate-900 focus:border-indigo-500 rounded-lg py-1.5 px-3 text-xs text-slate-100 outline-none"
+                                        placeholder="Native, Fluent, Conversational"
+                                      />
+                                    </div>
+                                  </div>
+                                </div>
+                              ))}
+                              
+                              <button
+                                onClick={() => addListItem('languages', { name: '', proficiency: '' })}
+                                className="w-full py-2.5 bg-slate-900 border border-slate-850 hover:border-slate-800 text-slate-300 font-bold rounded-lg text-xs flex items-center justify-center gap-1.5 transition-all"
+                              >
+                                <Plus className="w-3.5 h-3.5" /> Add Language
+                              </button>
+                            </div>
+                          )}
+
+                          {/* Achievements list */}
+                          {sect.id === 'achievements' && (
+                            <div className="space-y-6">
+                              {resume.achievements && resume.achievements.map((ach, achIdx) => (
+                                <div key={ach._id || achIdx} className="p-4 rounded-xl border border-slate-900 relative bg-slate-950/25 space-y-4">
+                                  <button 
+                                    onClick={() => removeListItem('achievements', achIdx)}
+                                    className="absolute top-3 right-3 text-slate-500 hover:text-rose-455 p-1 rounded-lg hover:bg-slate-900 transition-all"
+                                  >
+                                    <Trash2 className="w-3.5 h-3.5" />
+                                  </button>
+
+                                  <div className="grid grid-cols-2 gap-4 text-left">
+                                    <div className="col-span-2 space-y-1">
+                                      <label className="text-[9px] font-bold text-slate-500 uppercase">Award / Achievement Title</label>
+                                      <input 
+                                        type="text" 
+                                        value={ach.title}
+                                        onChange={(e) => updateListItem('achievements', achIdx, 'title', e.target.value)}
+                                        className="w-full bg-slate-950 border border-slate-900 focus:border-indigo-500 rounded-lg py-1.5 px-3 text-xs text-slate-100 outline-none"
+                                      />
+                                    </div>
+                                    <div className="col-span-2 space-y-1">
+                                      <label className="text-[9px] font-bold text-slate-500 uppercase">Description</label>
+                                      <textarea 
+                                        value={ach.description || ''}
+                                        rows={3}
+                                        onChange={(e) => updateListItem('achievements', achIdx, 'description', e.target.value)}
+                                        className="w-full bg-slate-950 border border-slate-900 focus:border-indigo-500 rounded-lg p-2.5 text-xs text-slate-100 outline-none resize-none font-mono"
+                                      />
+                                    </div>
+                                  </div>
+                                </div>
+                              ))}
+                              
+                              <button
+                                onClick={() => addListItem('achievements', { title: '', description: '' })}
+                                className="w-full py-2.5 bg-slate-900 border border-slate-850 hover:border-slate-800 text-slate-300 font-bold rounded-lg text-xs flex items-center justify-center gap-1.5 transition-all"
+                              >
+                                <Plus className="w-3.5 h-3.5" /> Add Award / Achievement
+                              </button>
+                            </div>
                           )}
                           
                         </div>
@@ -798,7 +1078,7 @@ export default function BuilderPage() {
             className="origin-top transition-transform duration-200"
             style={{ transform: `scale(${zoom / 100})` }}
           >
-            <ResumeTemplateSelector id={resume.templateId} data={resume} />
+            <ResumeTemplateSelector id={resume.templateId} data={resume} fontStyle={fontStyle} fontSize={fontSize} textColor={textColor} />
           </div>
 
           {/* Zoom & Reset Floating panel */}
@@ -882,16 +1162,58 @@ export default function BuilderPage() {
 
                         {/* Key Improvements suggestions */}
                         {latestReview.suggestions && latestReview.suggestions.length > 0 && (
-                          <div className="space-y-2">
+                          <div className="space-y-3">
                             <h4 className="text-xs font-bold text-white uppercase tracking-wider">Actionable Steps</h4>
-                            <ul className="space-y-2">
-                              {latestReview.suggestions.map((sug, idx) => (
-                                <li key={idx} className="text-xs text-slate-400 flex items-start gap-2 leading-relaxed">
-                                  <span className="text-indigo-400 shrink-0 mt-1">•</span>
-                                  <span>{sug}</span>
-                                </li>
-                              ))}
-                            </ul>
+                            <motion.div 
+                              initial="hidden"
+                              animate="show"
+                              variants={{
+                                hidden: { opacity: 0 },
+                                show: {
+                                  opacity: 1,
+                                  transition: {
+                                    staggerChildren: 0.15
+                                  }
+                                }
+                              }}
+                              className="space-y-3"
+                            >
+                              {latestReview.suggestions.map((sug, idx) => {
+                                const parts = sug.split('**');
+                                return (
+                                  <motion.div 
+                                    key={idx}
+                                    variants={{
+                                      hidden: { opacity: 0, y: -20, rotateX: -12 },
+                                      show: { 
+                                        opacity: 1, 
+                                        y: 0, 
+                                        rotateX: 0,
+                                        transition: { 
+                                          type: "spring", 
+                                          stiffness: 90, 
+                                          damping: 14 
+                                        } 
+                                      }
+                                    }}
+                                    className="p-3 bg-slate-900/60 dark:bg-slate-900/40 rounded-xl border border-slate-800/80 flex items-start gap-3 shadow-sm hover:border-pink-500/25 transition-colors transform-gpu"
+                                    style={{ transformOrigin: "top center" }}
+                                  >
+                                    <div className="w-5 h-5 rounded-full bg-pink-500/10 dark:bg-pink-500/20 text-pink-600 dark:text-pink-400 flex items-center justify-center font-bold text-[10px] shrink-0 mt-0.5 border border-pink-500/20">
+                                      {idx + 1}
+                                    </div>
+                                    <p className="text-[11px] text-slate-400 leading-relaxed text-left">
+                                      {parts.map((part, pIdx) => {
+                                        if (pIdx % 2 === 1) {
+                                          return <strong key={pIdx} className="text-pink-600 dark:text-pink-400 font-bold">{part}</strong>;
+                                        }
+                                        return part;
+                                      })}
+                                    </p>
+                                  </motion.div>
+                                );
+                              })}
+                            </motion.div>
                           </div>
                         )}
                       </div>
@@ -964,7 +1286,7 @@ export default function BuilderPage() {
       
       {/* Visual media print container */}
       <div className="hidden print:block absolute inset-0 z-50 bg-white">
-        <ResumeTemplateSelector id={resume.templateId} data={resume} />
+        <ResumeTemplateSelector id={resume.templateId} data={resume} fontStyle={fontStyle} fontSize={fontSize} textColor={textColor} />
       </div>
     </div>
   );

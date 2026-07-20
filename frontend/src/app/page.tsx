@@ -1,9 +1,11 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { useAuth } from '../components/AuthProvider';
+import ThemeToggle from '../components/ThemeToggle';
+import { aiApi } from '../lib/api';
 import { 
   Sparkles, 
   ArrowRight, 
@@ -19,14 +21,187 @@ import {
   Star,
   Zap,
   Menu,
-  X
+  X,
+  Upload,
+  Loader2
 } from 'lucide-react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion, AnimatePresence, useScroll, useTransform } from 'framer-motion';
+
+interface ResumeCardProps {
+  avatar: string;
+  name: string;
+  role: string;
+  icon1: string;
+  job1Title: string;
+  job1Dates: string;
+  icon2: string;
+  job2Title: string;
+  job2Dates: string;
+  educationTitle: string;
+  educationDegree: string;
+  skills: { name: string; value: number }[];
+}
+
+function ResumeCard({ 
+  avatar, name, role, icon1, job1Title, job1Dates, icon2, job2Title, job2Dates, educationTitle, educationDegree, skills 
+}: ResumeCardProps) {
+  const [rotate, setRotate] = useState({ x: 0, y: 0 });
+
+  const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
+    const card = e.currentTarget;
+    const box = card.getBoundingClientRect();
+    const x = e.clientX - box.left - box.width / 2;
+    const y = e.clientY - box.top - box.height / 2;
+    const rotateX = -(y / (box.height / 2)) * 12;
+    const rotateY = (x / (box.width / 2)) * 12;
+    setRotate({ x: rotateX, y: rotateY });
+  };
+
+  const handleMouseLeave = () => {
+    setRotate({ x: 0, y: 0 });
+  };
+
+  return (
+    <div 
+      onMouseMove={handleMouseMove}
+      onMouseLeave={handleMouseLeave}
+      style={{
+        transformStyle: "preserve-3d",
+        transform: `perspective(1000px) rotateX(${rotate.x}deg) rotateY(${rotate.y}deg)`,
+        transition: "transform 0.15s cubic-bezier(0.25, 1, 0.5, 1)"
+      }}
+      className="w-[300px] md:w-[340px] shrink-0 rounded-3xl p-4 border border-pink-200/50 shadow-2xl relative cursor-pointer bg-white/95 backdrop-blur-md select-none transform-gpu"
+    >
+      <div className="absolute inset-0 bg-pink-500/5 rounded-3xl blur-3xl pointer-events-none z-0" />
+      
+      <div className="relative rounded-2xl overflow-hidden z-10 bg-white p-5 border border-pink-100/80 shadow-sm text-left">
+        {/* Header */}
+        <div className="flex items-center justify-between mb-4">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-full overflow-hidden border-2 border-pink-100 bg-pink-50 relative shrink-0">
+              <Image 
+                src={avatar} 
+                alt={name}
+                width={100}
+                height={100}
+                className="object-cover w-full h-full"
+                unoptimized
+              />
+            </div>
+            <div>
+              <h3 className="text-base font-bold text-slate-800 tracking-tight leading-none mb-0.5">{name}</h3>
+              <p className="text-[9px] text-pink-600 font-semibold uppercase tracking-wider">{role}</p>
+            </div>
+          </div>
+          <Sparkles className="w-5 h-5 text-pink-500 animate-pulse fill-pink-50" />
+        </div>
+
+        {/* Experience */}
+        <div className="mb-4">
+          <h4 className="text-[10px] font-bold text-slate-700 uppercase tracking-widest border-b border-pink-100 pb-1 mb-2">
+            Experience
+          </h4>
+          <div className="space-y-3 relative pl-4 before:absolute before:left-1.5 before:top-1 before:bottom-1 before:w-[1.5px] before:bg-pink-100">
+            {/* Job 1 */}
+            <div className="relative">
+              <span className="absolute -left-[21px] top-0.5 w-3.5 h-3.5 rounded-full bg-pink-50 border border-pink-200 flex items-center justify-center text-[7px] text-pink-600">{icon1}</span>
+              <div className="font-semibold text-slate-800 text-[11px]">{job1Title}</div>
+              <div className="text-[8px] text-pink-500 font-medium mb-0.5">{job1Dates}</div>
+              <p className="text-[9px] text-slate-500 leading-normal">
+                Lorem ipsum dolor sit amet, consectetur adipiscing elit.
+              </p>
+            </div>
+            {/* Job 2 */}
+            <div className="relative">
+              <span className="absolute -left-[21px] top-0.5 w-3.5 h-3.5 rounded-full bg-pink-50 border border-pink-200 flex items-center justify-center text-[7px] text-pink-600">{icon2}</span>
+              <div className="font-semibold text-slate-800 text-[11px]">{job2Title}</div>
+              <div className="text-[8px] text-pink-500 font-medium mb-0.5">{job2Dates}</div>
+              <p className="text-[9px] text-slate-500 leading-normal">
+                Sed ut perspiciatis unde omnis iste natus error sit.
+              </p>
+            </div>
+          </div>
+        </div>
+
+        {/* Education */}
+        <div className="mb-4">
+          <h4 className="text-[10px] font-bold text-slate-700 uppercase tracking-widest border-b border-pink-100 pb-1 mb-2">
+            Education
+          </h4>
+          <div className="pl-4 relative">
+            <span className="absolute left-0 top-0.5 text-xs">🎓</span>
+            <div className="font-semibold text-slate-800 text-[11px]">{educationTitle}</div>
+            <div className="text-[9px] text-slate-500">{educationDegree}</div>
+          </div>
+        </div>
+
+        {/* Skills */}
+        <div>
+          <h4 className="text-[10px] font-bold text-slate-700 uppercase tracking-widest border-b border-pink-100 pb-1 mb-2">
+            Skills
+          </h4>
+          <div className="grid grid-cols-2 gap-2">
+            {skills.map((skill, index) => (
+              <div key={index} className="space-y-0.5">
+                <div className="text-[9px] font-semibold text-slate-700">{skill.name}</div>
+                <div className="h-1 w-full bg-pink-50 rounded-full overflow-hidden border border-pink-100/50">
+                  <div 
+                    className="h-full bg-pink-500 rounded-full" 
+                    style={{ width: `${skill.value}%` }}
+                  />
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
 
 export default function LandingPage() {
   const { user } = useAuth();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [activeFaq, setActiveFaq] = useState<number | null>(null);
+  
+  const [guestLoading, setGuestLoading] = useState(false);
+  const [guestLogs, setGuestLogs] = useState('');
+  const [guestReview, setGuestReview] = useState<any>(null);
+  const [showModal, setShowModal] = useState(false);
+
+  const handleGuestUpload = async (file: File) => {
+    try {
+      setGuestLoading(true);
+      setShowModal(true);
+      setGuestReview(null);
+      setGuestLogs('Reading uploaded document...');
+
+      const formData = new FormData();
+      formData.append('file', file);
+
+      setTimeout(() => setGuestLogs('Extracting text content with parser...'), 800);
+      setTimeout(() => setGuestLogs('Aligning sections with Gemini AI structuring...'), 1600);
+      setTimeout(() => setGuestLogs('Calculating ATS score metrics...'), 3200);
+
+      const res = await aiApi.reviewGuest(formData);
+      if (res.success && res.review) {
+        setGuestReview(res.review);
+      }
+    } catch (err: any) {
+      console.error(err);
+      setGuestLogs(`Error: ${err.message || 'Failed to scan resume'}`);
+    } finally {
+      setGuestLoading(false);
+    }
+  };
+  
+  const containerRef = useRef<HTMLDivElement>(null);
+  const { scrollYProgress } = useScroll({
+    target: containerRef,
+    offset: ["start end", "end start"]
+  });
+
+  const xTranslation = useTransform(scrollYProgress, [0, 1], ["-20%", "10%"]);
 
   const features = [
     {
@@ -142,41 +317,42 @@ export default function LandingPage() {
       <div className="absolute bottom-[10%] left-[15%] w-[40%] h-[40%] bg-violet-900/15 rounded-full blur-[130px] pointer-events-none" />
 
       {/* Header */}
-      <nav className="sticky top-0 z-50 glass-premium border-b border-slate-800/80 px-6 py-4">
+      <nav className="sticky top-0 z-50 glass-premium border-b border-pink-200/50 px-6 py-4">
         <div className="max-w-7xl mx-auto flex items-center justify-between">
           <Link href="/" className="flex items-center gap-2">
-            <div className="bg-indigo-600 p-2 rounded-lg text-white">
+            <div className="bg-pink-600 p-2 rounded-lg text-white">
               <Sparkles className="w-5 h-5" />
             </div>
-            <span className="font-display text-xl font-bold tracking-tight text-white">
+            <span className="font-display text-xl font-bold tracking-tight text-slate-100">
               CVItAI
             </span>
           </Link>
 
           {/* Desktop Nav links */}
-          <div className="hidden md:flex items-center gap-8 text-sm font-medium text-slate-300">
-            <a href="#features" className="hover:text-indigo-400 transition-colors">Features</a>
-            <a href="#pricing" className="hover:text-indigo-400 transition-colors">Pricing</a>
-            <a href="#faq" className="hover:text-indigo-400 transition-colors">FAQ</a>
+          <div className="hidden md:flex items-center gap-8 text-sm font-bold text-slate-750">
+            <a href="#features" className="hover:text-pink-600 transition-colors">Features</a>
+            <a href="#pricing" className="hover:text-pink-600 transition-colors">Pricing</a>
+            <a href="#faq" className="hover:text-pink-600 transition-colors">FAQ</a>
             {user ? (
-              <Link href="/dashboard" className="hover:text-indigo-400 transition-colors">Dashboard</Link>
+              <Link href="/dashboard" className="hover:text-pink-600 transition-colors">Dashboard</Link>
             ) : (
-              <Link href="/login" className="hover:text-indigo-400 transition-colors">Login</Link>
+              <Link href="/login" className="hover:text-pink-600 transition-colors">Login</Link>
             )}
           </div>
 
           <div className="hidden md:flex items-center gap-4">
+            <ThemeToggle />
             {user ? (
               <Link 
                 href="/dashboard" 
-                className="bg-indigo-600 hover:bg-indigo-500 text-white font-semibold py-2 px-5 rounded-lg flex items-center gap-2 text-sm transition-all"
+                className="bg-pink-600 hover:bg-pink-500 text-white font-semibold py-2 px-5 rounded-lg flex items-center gap-2 text-sm transition-all"
               >
                 Dashboard <ArrowRight className="w-4 h-4" />
               </Link>
             ) : (
               <Link 
                 href="/register" 
-                className="bg-indigo-600 hover:bg-indigo-500 text-white font-semibold py-2 px-5 rounded-lg flex items-center gap-2 text-sm transition-all"
+                className="bg-pink-600 hover:bg-pink-500 text-white font-semibold py-2 px-5 rounded-lg flex items-center gap-2 text-sm transition-all shadow-md shadow-pink-200/50"
               >
                 Create Account <ArrowRight className="w-4 h-4" />
               </Link>
@@ -187,7 +363,7 @@ export default function LandingPage() {
           <div className="md:hidden">
             <button 
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-              className="text-slate-300 hover:text-white p-1"
+              className="text-slate-700 hover:text-pink-600 p-1"
             >
               {mobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
             </button>
@@ -202,35 +378,35 @@ export default function LandingPage() {
             initial={{ opacity: 0, y: -20 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -20 }}
-            className="md:hidden absolute top-[72px] left-0 w-full bg-slate-900 border-b border-slate-800 p-6 z-40 flex flex-col gap-4"
+            className="md:hidden absolute top-[72px] left-0 w-full bg-white/95 backdrop-blur-md border-b border-pink-200/50 p-6 z-40 flex flex-col gap-4 shadow-xl"
           >
             <a 
               href="#features" 
               onClick={() => setMobileMenuOpen(false)}
-              className="text-slate-300 hover:text-white font-medium py-1"
+              className="text-slate-750 hover:text-pink-600 font-bold py-1 transition-colors"
             >
               Features
             </a>
             <a 
               href="#pricing" 
               onClick={() => setMobileMenuOpen(false)}
-              className="text-slate-300 hover:text-white font-medium py-1"
+              className="text-slate-750 hover:text-pink-600 font-bold py-1 transition-colors"
             >
               Pricing
             </a>
             <a 
               href="#faq" 
               onClick={() => setMobileMenuOpen(false)}
-              className="text-slate-300 hover:text-white font-medium py-1"
+              className="text-slate-750 hover:text-pink-600 font-bold py-1 transition-colors"
             >
               FAQ
             </a>
-            <hr className="border-slate-800" />
+            <hr className="border-pink-100" />
             {user ? (
               <Link 
                 href="/dashboard" 
                 onClick={() => setMobileMenuOpen(false)}
-                className="bg-indigo-600 hover:bg-indigo-500 text-white font-semibold py-2 px-4 rounded-lg text-center flex items-center justify-center gap-2 text-sm"
+                className="bg-pink-600 hover:bg-pink-500 text-white font-bold py-2.5 px-4 rounded-xl text-center flex items-center justify-center gap-2 text-xs transition-all shadow-md shadow-pink-200/50"
               >
                 Dashboard <ArrowRight className="w-4 h-4" />
               </Link>
@@ -239,14 +415,14 @@ export default function LandingPage() {
                 <Link 
                   href="/login" 
                   onClick={() => setMobileMenuOpen(false)}
-                  className="text-slate-300 hover:text-white font-medium text-center py-2"
+                  className="text-slate-750 hover:text-pink-600 font-bold text-center py-2 transition-colors"
                 >
                   Login
                 </Link>
                 <Link 
                   href="/register" 
                   onClick={() => setMobileMenuOpen(false)}
-                  className="bg-indigo-600 hover:bg-indigo-500 text-white font-semibold py-2 px-4 rounded-lg text-center flex items-center justify-center gap-2 text-sm"
+                  className="bg-pink-600 hover:bg-pink-500 text-white font-bold py-2.5 px-4 rounded-xl text-center flex items-center justify-center gap-2 text-xs transition-all shadow-md shadow-pink-200/50"
                 >
                   Create Account <ArrowRight className="w-4 h-4" />
                 </Link>
@@ -262,9 +438,9 @@ export default function LandingPage() {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6 }}
-          className="flex items-center gap-2 px-3 py-1.5 rounded-full glass border-indigo-500/20 text-indigo-400 text-xs font-semibold uppercase tracking-wider mb-6"
+          className="flex items-center gap-2 px-3 py-1.5 rounded-full glass border-pink-200/50 text-pink-700 text-xs font-bold uppercase tracking-wider mb-6"
         >
-          <Sparkles className="w-3.5 h-3.5 animate-pulse" /> Driven by Google Gemini 2.5 AI
+          <Sparkles className="w-3.5 h-3.5 animate-pulse text-pink-500" /> Driven by Google Gemini 2.5 AI
         </motion.div>
 
         <motion.h1 
@@ -280,7 +456,7 @@ export default function LandingPage() {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6, delay: 0.2 }}
-          className="text-lg md:text-xl text-slate-400 max-w-2xl mb-10 leading-relaxed"
+          className="text-lg md:text-xl text-slate-650 max-w-2xl mb-10 leading-relaxed font-medium"
         >
           Create ATS-optimized resumes with our premium real-time editor. Access Gemini-powered scorecards, bullet point tailoring, and custom templates built for high conversion.
         </motion.p>
@@ -308,7 +484,7 @@ export default function LandingPage() {
               </Link>
               <Link 
                 href="/login" 
-                className="glass hover:bg-slate-800/80 text-white font-semibold py-4 px-8 rounded-xl text-base transition-all"
+                className="glass hover:bg-pink-50 text-slate-700 font-semibold py-4 px-8 rounded-xl text-base transition-all border border-pink-200/50"
               >
                 Explore Features
               </Link>
@@ -316,79 +492,120 @@ export default function LandingPage() {
           )}
         </motion.div>
 
-        {/* Dashboard Preview Mockup */}
-        <motion.div 
-          initial={{ opacity: 0, scale: 0.95 }}
-          animate={{ opacity: 1, scale: 1 }}
-          transition={{ duration: 0.8, delay: 0.4 }}
-          className="w-full max-w-5xl rounded-2xl glass-premium p-3 border border-slate-800/80 shadow-2xl shadow-indigo-950/20 relative"
+        {/* Direct Resume Uploader dropzone */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6, delay: 0.4 }}
+          className="w-full max-w-xl mx-auto mb-16 bg-slate-900/40 dark:bg-slate-900/20 backdrop-blur-md rounded-2xl border border-slate-800/80 p-6 flex flex-col items-center relative overflow-hidden"
         >
-          <div className="absolute inset-0 bg-indigo-500/10 rounded-2xl blur-3xl pointer-events-none z-0" />
-          <div className="bg-slate-900/90 rounded-xl overflow-hidden border border-slate-800/60 z-10 relative">
-            {/* Header controls bar */}
-            <div className="flex items-center justify-between px-4 py-3 bg-slate-950/60 border-b border-slate-800/60">
-              <div className="flex items-center gap-2">
-                <span className="w-3 h-3 bg-rose-500 rounded-full" />
-                <span className="w-3 h-3 bg-amber-500 rounded-full" />
-                <span className="w-3 h-3 bg-emerald-500 rounded-full" />
-              </div>
-              <div className="text-xs text-slate-500 font-mono select-none">cvitai-builder-preview.tsx</div>
-              <div className="w-10" />
-            </div>
-            
-            {/* Mock Builder layout grid */}
-            <div className="grid grid-cols-12 min-h-[400px]">
-              {/* Left input control mock */}
-              <div className="col-span-4 border-r border-slate-800/60 bg-slate-900/40 p-4 text-left hidden md:block">
-                <div className="h-6 bg-slate-800/60 rounded-md w-3/4 mb-6 animate-pulse" />
-                <div className="space-y-4">
-                  {[1, 2, 3].map((idx) => (
-                    <div key={idx} className="p-3 bg-slate-950/30 rounded-lg border border-slate-800/30 space-y-2">
-                      <div className="h-3 bg-slate-800/80 rounded w-1/3" />
-                      <div className="h-2 bg-slate-800/40 rounded w-2/3" />
-                    </div>
-                  ))}
-                </div>
-              </div>
-              
-              {/* Right preview sheet mock */}
-              <div className="col-span-12 md:col-span-8 bg-slate-950/30 p-6 flex flex-col justify-between">
-                <div className="space-y-6 text-left">
-                  <div className="space-y-2">
-                    <div className="h-8 bg-indigo-500/20 rounded w-1/3" />
-                    <div className="h-3 bg-slate-800 rounded w-1/2" />
-                  </div>
-                  <hr className="border-slate-800/60" />
-                  <div className="space-y-3">
-                    <div className="h-4 bg-slate-800 rounded w-1/4" />
-                    <div className="h-2 bg-slate-800/60 rounded w-full" />
-                    <div className="h-2 bg-slate-800/60 rounded w-full" />
-                    <div className="h-2 bg-slate-800/60 rounded w-5/6" />
-                  </div>
-                </div>
-                
-                {/* Floating AI metrics panel */}
-                <div className="mt-8 flex justify-end">
-                  <div className="glass p-3 rounded-xl border-indigo-500/35 flex items-center gap-4 animate-bounce">
-                    <div className="w-10 h-10 rounded-full bg-emerald-500/20 text-emerald-400 flex items-center justify-center font-bold text-sm">
-                      89%
-                    </div>
-                    <div className="text-left">
-                      <div className="text-xs font-semibold text-white">ATS Compatibility Match</div>
-                      <div className="text-[10px] text-slate-400">Excellent keyword density detected</div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
+          <div className="absolute inset-0 bg-gradient-to-tr from-pink-500/5 to-indigo-500/5 pointer-events-none" />
+          
+          <div className="w-12 h-12 rounded-full bg-pink-500/10 text-pink-600 dark:text-pink-400 flex items-center justify-center mb-4 border border-pink-500/20">
+            <Upload className="w-6 h-6" />
           </div>
+
+          <h3 className="font-display font-bold text-lg text-white mb-1">Direct ATS Scanner</h3>
+          <p className="text-xs text-slate-400 mb-4 max-w-sm">
+            Drag & drop your existing PDF or DOCX resume here to verify your current ATS score instantly.
+          </p>
+
+          <label className="w-full h-32 border-2 border-dashed border-slate-800 hover:border-pink-500/30 rounded-xl flex flex-col items-center justify-center cursor-pointer hover:bg-slate-900/20 transition-all select-none group relative">
+            <input 
+              type="file" 
+              accept=".pdf,.docx,.doc" 
+              className="hidden" 
+              onChange={(e) => {
+                const file = e.target.files?.[0];
+                if (file) handleGuestUpload(file);
+              }}
+            />
+            <span className="text-xs font-semibold text-slate-350 group-hover:text-pink-400 transition-colors">
+              Drop file here or browse files
+            </span>
+            <span className="text-[10px] text-slate-500 mt-1">
+              Supports PDF and Word (DOCX) up to 5MB
+            </span>
+          </label>
         </motion.div>
+        
+        {/* Scroll Train of Interactive 3D Resumes */}
+        <div ref={containerRef} className="w-full overflow-hidden py-12 relative mt-8">
+          <div className="absolute inset-0 bg-pink-500/5 rounded-3xl blur-3xl pointer-events-none z-0" />
+          <motion.div 
+            style={{ x: xTranslation }} 
+            className="flex gap-8 justify-start items-center w-[160%] md:w-[120%] select-none relative z-10 pl-[5%]"
+          >
+            {/* Card 1: Marketing Manager */}
+            <ResumeCard 
+              avatar="https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=150"
+              name="Elena Rostova"
+              role="Marketing Manager"
+              icon1="💼"
+              job1Title="Brand Lead @ Stripe"
+              job1Dates="Aug 2023 - Present"
+              icon2="📈"
+              job2Title="Marketing Strategist"
+              job2Dates="Jan 2021 - Aug 2023"
+              educationTitle="University of California"
+              educationDegree="Bachelor of Business Administration"
+              skills={[
+                { name: "Digital Marketing", value: 90 },
+                { name: "Social Growth", value: 85 },
+                { name: "Brand Strategy", value: 75 },
+                { name: "SEO & SEM", value: 80 }
+              ]}
+            />
+
+            {/* Card 2: Software Engineer */}
+            <ResumeCard 
+              avatar="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150"
+              name="Marcus Vance"
+              role="Software Engineer"
+              icon1="💻"
+              job1Title="Senior Engineer @ Meta"
+              job1Dates="Mar 2022 - Present"
+              icon2="⚙️"
+              job2Title="Full Stack Developer"
+              job2Dates="Jun 2019 - Feb 2022"
+              educationTitle="Stanford University"
+              educationDegree="B.S. in Computer Science"
+              skills={[
+                { name: "React & Next.js", value: 95 },
+                { name: "Node.js & Go", value: 90 },
+                { name: "System Architecture", value: 85 },
+                { name: "Cloud Computing", value: 80 }
+              ]}
+            />
+
+            {/* Card 3: Product Designer */}
+            <ResumeCard 
+              avatar="https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150"
+              name="Sarah Jenkins"
+              role="Product Designer"
+              icon1="🎨"
+              job1Title="UI/UX Designer @ Airbnb"
+              job1Dates="Oct 2022 - Present"
+              icon2="📐"
+              job2Title="Product Illustrator"
+              job2Dates="Sep 2020 - Sep 2022"
+              educationTitle="Rhode Island School of Design"
+              educationDegree="B.F.A. in Industrial Design"
+              skills={[
+                { name: "Figma & Design Systems", value: 98 },
+                { name: "User Research", value: 85 },
+                { name: "Prototyping", value: 90 },
+                { name: "Interaction Design", value: 88 }
+              ]}
+            />
+          </motion.div>
+        </div>
       </section>
 
       {/* Features Section */}
       <section id="features" className="py-20 md:py-32 px-6 max-w-7xl mx-auto border-t border-slate-900">
         <div className="text-center mb-16 md:mb-24">
-          <h2 className="text-3xl md:text-5xl font-display font-extrabold tracking-tight text-white mb-4">
+          <h2 className="text-3xl md:text-5xl font-display font-extrabold tracking-tight text-foreground mb-4">
             Engineered for Fast Conversion
           </h2>
           <p className="text-slate-400 max-w-2xl mx-auto">
@@ -407,7 +624,7 @@ export default function LandingPage() {
                 <div className="mb-6 bg-slate-950 p-3.5 rounded-xl inline-block border border-slate-800/60 group-hover:border-indigo-500/25 transition-all">
                   {feat.icon}
                 </div>
-                <h3 className="text-xl font-bold font-display text-white mb-3">{feat.title}</h3>
+                <h3 className="text-xl font-bold font-display text-foreground mb-3">{feat.title}</h3>
                 <p className="text-slate-400 text-sm leading-relaxed">{feat.description}</p>
               </div>
             </motion.div>
@@ -418,7 +635,7 @@ export default function LandingPage() {
       {/* Testimonials */}
       <section className="py-20 md:py-32 px-6 max-w-7xl mx-auto border-t border-slate-900">
         <div className="text-center mb-16">
-          <h2 className="text-3xl md:text-5xl font-display font-extrabold tracking-tight text-white mb-4">
+          <h2 className="text-3xl md:text-5xl font-display font-extrabold tracking-tight text-foreground mb-4">
             Job Seekers Excel with CVItAI
           </h2>
           <p className="text-slate-400 max-w-xl mx-auto">
@@ -462,7 +679,7 @@ export default function LandingPage() {
                   {t.author.charAt(0)}
                 </div>
                 <div>
-                  <h4 className="text-sm font-bold text-white">{t.author}</h4>
+                  <h4 className="text-sm font-bold text-foreground">{t.author}</h4>
                   <p className="text-[11px] text-slate-400">{t.role} @ <span className="text-indigo-400">{t.company}</span></p>
                 </div>
               </div>
@@ -474,7 +691,7 @@ export default function LandingPage() {
       {/* Pricing Section */}
       <section id="pricing" className="py-20 md:py-32 px-6 max-w-7xl mx-auto border-t border-slate-900">
         <div className="text-center mb-16">
-          <h2 className="text-3xl md:text-5xl font-display font-extrabold tracking-tight text-white mb-4">
+          <h2 className="text-3xl md:text-5xl font-display font-extrabold tracking-tight text-foreground mb-4">
             Transparent pricing for any stage
           </h2>
           <p className="text-slate-400 max-w-xl mx-auto">
@@ -499,10 +716,10 @@ export default function LandingPage() {
               )}
               
               <div>
-                <h3 className="text-lg font-bold font-display text-white mb-2">{tier.name}</h3>
+                <h3 className="text-lg font-bold font-display text-foreground mb-2">{tier.name}</h3>
                 <p className="text-slate-400 text-xs mb-6 min-h-[36px]">{tier.description}</p>
                 <div className="flex items-baseline gap-1 mb-8">
-                  <span className="text-4xl font-extrabold text-white">{tier.price}</span>
+                  <span className="text-4xl font-extrabold text-foreground">{tier.price}</span>
                   {tier.period && <span className="text-slate-400 text-sm font-medium">{tier.period}</span>}
                 </div>
                 
@@ -536,7 +753,7 @@ export default function LandingPage() {
       {/* FAQ Section */}
       <section id="faq" className="py-20 md:py-32 px-6 max-w-4xl mx-auto border-t border-slate-900">
         <div className="text-center mb-16">
-          <h2 className="text-3xl md:text-5xl font-display font-extrabold tracking-tight text-white mb-4">
+          <h2 className="text-3xl md:text-5xl font-display font-extrabold tracking-tight text-foreground mb-4">
             Frequently Asked Questions
           </h2>
           <p className="text-slate-400">
@@ -554,7 +771,7 @@ export default function LandingPage() {
                 onClick={() => setActiveFaq(activeFaq === idx ? null : idx)}
                 className="w-full flex items-center justify-between p-6 text-left hover:bg-slate-900/50 transition-all"
               >
-                <span className="font-bold text-sm md:text-base text-white">{faq.q}</span>
+                <span className="font-bold text-sm md:text-base text-foreground">{faq.q}</span>
                 {activeFaq === idx ? <ChevronUp className="w-5 h-5 text-indigo-400" /> : <ChevronDown className="w-5 h-5 text-slate-500" />}
               </button>
               
@@ -584,7 +801,7 @@ export default function LandingPage() {
             <div className="bg-indigo-600 p-1.5 rounded-lg text-white">
               <Sparkles className="w-4 h-4" />
             </div>
-            <span className="font-display font-bold text-base text-white">CVItAI</span>
+            <span className="font-display font-bold text-base text-foreground">CVItAI</span>
           </div>
 
           <div className="flex flex-wrap items-center justify-center gap-8 text-xs text-slate-400 font-medium">
@@ -596,6 +813,123 @@ export default function LandingPage() {
           </div>
         </div>
       </footer>
+
+      {/* ATS Check Modal */}
+      <AnimatePresence>
+        {showModal && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-md">
+            <motion.div 
+              initial={{ scale: 0.95, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.95, opacity: 0 }}
+              className="bg-slate-900 border border-slate-800 rounded-2xl w-full max-w-lg p-6 overflow-hidden relative flex flex-col max-h-[85vh]"
+            >
+              <button 
+                onClick={() => setShowModal(false)}
+                className="absolute top-4 right-4 p-1.5 rounded-lg hover:bg-slate-800 text-slate-400 hover:text-white transition-all"
+              >
+                <X className="w-4 h-4" />
+              </button>
+
+              <h2 className="font-display font-extrabold text-xl text-white mb-6 tracking-tight text-left">
+                ATS Analysis Report
+              </h2>
+
+              {guestLoading ? (
+                <div className="flex-1 flex flex-col items-center justify-center py-12 space-y-4">
+                  <Loader2 className="w-10 h-10 text-pink-500 animate-spin" />
+                  <div className="text-sm font-bold text-white uppercase tracking-wider">AI Scan in Progress</div>
+                  <div className="text-xs text-slate-400 font-mono animate-pulse">{guestLogs}</div>
+                </div>
+              ) : guestReview ? (
+                <div className="flex-1 flex flex-col relative min-h-[350px]">
+                  {/* Blurred Background Preview */}
+                  <div className="flex-1 overflow-y-auto space-y-6 pr-1 filter blur-md select-none pointer-events-none opacity-25">
+                    {/* Score circle */}
+                    <div className="flex items-center gap-6 p-4 bg-slate-950/40 rounded-xl border border-slate-850">
+                      <div className="relative w-20 h-20 shrink-0">
+                        <svg className="w-full h-full transform -rotate-90">
+                          <circle 
+                            cx="40" 
+                            cy="40" 
+                            r="34" 
+                            className="stroke-slate-850 fill-none" 
+                            strokeWidth="6" 
+                          />
+                          <circle 
+                            cx="40" 
+                            cy="40" 
+                            r="34" 
+                            className="stroke-pink-500 fill-none" 
+                            strokeWidth="6" 
+                            strokeDasharray={2 * Math.PI * 34}
+                            strokeDashoffset={2 * Math.PI * 34 * 0.3}
+                          />
+                        </svg>
+                        <div className="absolute inset-0 flex items-center justify-center font-mono font-bold text-lg text-white">
+                          85
+                        </div>
+                      </div>
+                      <div>
+                        <h3 className="font-bold text-sm text-white">ATS Optimization Match</h3>
+                        <p className="text-xs text-slate-400 mt-1">
+                          Your resume shows compliance with professional standard ATS filters.
+                        </p>
+                      </div>
+                    </div>
+
+                    {/* Feedback block */}
+                    <div className="p-4 bg-slate-950/20 rounded-xl border border-slate-850 space-y-2">
+                      <h4 className="text-xs font-bold text-slate-400 uppercase tracking-widest">Recruiter Verdict</h4>
+                      <p className="text-xs text-slate-350 leading-relaxed">
+                        Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.
+                      </p>
+                    </div>
+                  </div>
+
+                  {/* High Contrast Authentication Overlay */}
+                  <div className="absolute inset-0 flex flex-col items-center justify-center text-center p-6 bg-slate-900/60 rounded-2xl z-10">
+                    <div className="w-12 h-12 rounded-full bg-pink-500/10 text-pink-500 flex items-center justify-center mb-4 border border-pink-500/20">
+                      <Sparkles className="w-6 h-6 animate-pulse" />
+                    </div>
+                    
+                    <h3 className="font-display font-extrabold text-lg text-white mb-2 tracking-tight">
+                      Scorecard Ready to Unlock!
+                    </h3>
+                    
+                    <p className="text-xs text-slate-300 leading-relaxed mb-6 max-w-sm">
+                      We have extracted your resume details and calculated your ATS score. Register or log in to view your complete breakdown and 5-6 actionable improvements.
+                    </p>
+
+                    <div className="w-full flex flex-col gap-3">
+                      <Link 
+                        href="/register" 
+                        className="w-full bg-indigo-600 hover:bg-indigo-500 text-white font-bold py-3 rounded-xl flex items-center justify-center gap-2 text-xs transition-all shadow-lg shadow-indigo-650/25"
+                      >
+                        Create Free Account <ArrowRight className="w-4 h-4" />
+                      </Link>
+                      <Link 
+                        href="/login" 
+                        className="w-full bg-slate-950 hover:bg-slate-900 border border-slate-850 text-slate-200 font-semibold py-3 rounded-xl flex items-center justify-center text-xs transition-all"
+                      >
+                        Log In to Existing Account
+                      </Link>
+                    </div>
+
+                    <p className="text-[10px] text-slate-500 mt-4">
+                      Free membership includes 1 free resume review & 3 free resume creations.
+                    </p>
+                  </div>
+                </div>
+              ) : (
+                <div className="text-xs text-rose-450 text-center py-6">
+                  {guestLogs || 'Unknown error occurred.'}
+                </div>
+              )}
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }

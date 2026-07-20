@@ -4,36 +4,125 @@
 
 @layer base {
   :root {
-    --background: 224 71% 4%;
-    --foreground: 213 31% 91%;
+    --background: 340 30% 98.5%;
+    --foreground: 340 25% 12%;
 
-    --muted: 223 47% 11%;
-    --muted-foreground: 215.4 16.3% 56.9%;
+    --muted: 340 15% 94%;
+    --muted-foreground: 340 12% 45%;
 
-    --popover: 224 71% 4%;
-    --popover-foreground: 213 31% 91%;
+    --popover: 340 30% 98.5%;
+    --popover-foreground: 340 25% 12%;
 
-    --card: 224 71% 4%;
-    --card-foreground: 213 31% 91%;
+    --card: 0 0% 100%;
+    --card-foreground: 340 25% 12%;
 
-    --border: 216 34% 17%;
-    --input: 216 34% 17%;
+    --border: 340 20% 90%;
+    --input: 340 20% 90%;
 
-    --primary: 210 40% 98%;
-    --primary-foreground: 222.2 47.4% 11.2%;
+    --primary: 340 75% 55%;
+    --primary-foreground: 0 0% 100%;
 
-    --secondary: 222.2 47.4% 11.2%;
-    --secondary-foreground: 210 40% 98%;
+    --secondary: 340 15% 94%;
+    --secondary-foreground: 340 75% 45%;
 
-    --accent: 216 34% 17%;
-    --accent-foreground: 210 40% 98%;
+    --accent: 340 40% 93%;
+    --accent-foreground: 340 75% 45%;
 
-    --destructive: 0 63% 31%;
-    --destructive-foreground: 210 40% 98%;
+    --destructive: 350 80% 50%;
+    --destructive-foreground: 0 0% 100%;
 
-    --ring: 216 34% 17%;
+    --ring: 340 75% 55%;
 
     --radius: 0.5rem;
+
+    --color-slate-50: 340 30% 99%;
+    --color-slate-100: 340 25% 12%;
+    --color-slate-200: 340 15% 30%;
+    --color-slate-300: 340 12% 40%;
+    --color-slate-350: 340 12% 45%;
+    --color-slate-400: 340 12% 45%;
+    --color-slate-450: 340 12% 50%;
+    --color-slate-500: 340 75% 55%;
+    --color-slate-650: 340 15% 35%;
+    --color-slate-600: 340 12% 40%;
+    --color-slate-700: 340 25% 20%;
+    --color-slate-800: 340 20% 90%;
+    --color-slate-850: 340 20% 92%;
+    --color-slate-900: 340 30% 96%;
+    --color-slate-950: 340 30% 98.5%;
+
+    --color-indigo-50: 340 40% 97%;
+    --color-indigo-100: 340 40% 95%;
+    --color-indigo-200: 340 40% 90%;
+    --color-indigo-250: 340 40% 88%;
+    --color-indigo-300: 340 75% 75%;
+    --color-indigo-400: 340 75% 65%;
+    --color-indigo-500: 340 75% 60%;
+    --color-indigo-600: 340 75% 55%;
+    --color-indigo-700: 340 75% 45%;
+    --color-indigo-800: 340 75% 35%;
+    --color-indigo-900: 340 40% 93%;
+    --color-indigo-950: 340 40% 91%;
+  }
+
+  .dark {
+    --background: 340 25% 6%;
+    --foreground: 340 20% 95%;
+
+    --muted: 340 20% 12%;
+    --muted-foreground: 340 10% 65%;
+
+    --popover: 340 25% 6%;
+    --popover-foreground: 340 20% 95%;
+
+    --card: 340 25% 9%;
+    --card-foreground: 340 20% 95%;
+
+    --border: 340 20% 16%;
+    --input: 340 20% 16%;
+
+    --primary: 340 85% 65%;
+    --primary-foreground: 0 0% 100%;
+
+    --secondary: 340 20% 12%;
+    --secondary-foreground: 340 85% 75%;
+
+    --accent: 340 35% 15%;
+    --accent-foreground: 340 85% 75%;
+
+    --destructive: 350 80% 50%;
+    --destructive-foreground: 0 0% 100%;
+
+    --ring: 340 85% 65%;
+
+    --color-slate-50: 340 25% 12%;
+    --color-slate-100: 340 20% 95%;
+    --color-slate-200: 340 10% 85%;
+    --color-slate-300: 340 10% 75%;
+    --color-slate-350: 340 10% 65%;
+    --color-slate-400: 340 10% 65%;
+    --color-slate-450: 340 10% 60%;
+    --color-slate-500: 340 85% 65%;
+    --color-slate-650: 340 10% 70%;
+    --color-slate-600: 340 10% 75%;
+    --color-slate-700: 340 20% 16%;
+    --color-slate-800: 340 20% 16%;
+    --color-slate-850: 340 20% 14%;
+    --color-slate-900: 340 25% 9%;
+    --color-slate-950: 340 25% 6%;
+
+    --color-indigo-50: 340 20% 12%;
+    --color-indigo-100: 340 20% 16%;
+    --color-indigo-200: 340 30% 25%;
+    --color-indigo-250: 340 30% 28%;
+    --color-indigo-300: 340 85% 80%;
+    --color-indigo-400: 340 85% 75%;
+    --color-indigo-500: 340 85% 70%;
+    --color-indigo-600: 340 85% 65%;
+    --color-indigo-700: 340 85% 55%;
+    --color-indigo-800: 340 85% 45%;
+    --color-indigo-900: 340 35% 15%;
+    --color-indigo-950: 340 35% 12%;
   }
 }
 
@@ -49,21 +138,21 @@
 
 /* Glassmorphism utility classes */
 .glass {
-  background: rgba(15, 23, 42, 0.45);
+  background: rgba(255, 255, 255, 0.45);
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(0, 0, 0, 0.05);
 }
 
 .glass-premium {
-  background: radial-gradient(120% 120% at 50% 10%, rgba(15, 23, 42, 0.3) 0%, rgba(8, 12, 28, 0.7) 100%);
+  background: radial-gradient(120% 120% at 50% 10%, rgba(255, 255, 255, 0.7) 0%, rgba(253, 244, 245, 0.85) 100%);
   backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
-  border: 1px solid rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(0, 0, 0, 0.04);
 }
 
 .text-gradient {
-  background: linear-gradient(135deg, #ffffff 0%, #a5b4fc 50%, #818cf8 100%);
+  background: linear-gradient(135deg, #1f2937 0%, #db2777 50%, #be185d 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
 }
